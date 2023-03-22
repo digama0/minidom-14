@@ -82,6 +82,7 @@ pub fn escape(raw: &[u8]) -> Cow<[u8]> {
 pub struct Element {
     name: String,
     namespace: String,
+    #[allow(unused)]
     /// This is only used when deserializing. If you have to use a custom prefix use
     /// `ElementBuilder::prefix`.
     prefix: Option<Prefix>,
@@ -316,7 +317,7 @@ impl Element {
 
         let mut prefixes = BTreeMap::new();
         let root: Element = loop {
-            let e = reader.read_event(&mut buf)?;
+            let e = reader.read_event_into(&mut buf)?;
             match e {
                 Event::Empty(ref e) | Event::Start(ref e) => {
                     break build_element(reader, e, &mut prefixes)?;
@@ -340,7 +341,7 @@ impl Element {
         let mut prefix_stack = vec![prefixes];
 
         loop {
-            match reader.read_event(&mut buf)? {
+            match reader.read_event_into(&mut buf)? {
                 Event::Empty(ref e) => {
                     let mut prefixes = prefix_stack.last().unwrap().clone();
                     let elem = build_element(reader, e, &mut prefixes)?;
@@ -362,7 +363,7 @@ impl Element {
                     if let Some(to) = stack.last_mut() {
                         // TODO: check whether this is correct, we are comparing &[u8]s, not &strs
                         let elem_name = e.name();
-                        let mut split_iter = elem_name.splitn(2, |u| *u == 0x3A);
+                        let mut split_iter = elem_name.0.splitn(2, |u| *u == b':');
                         let possible_prefix = split_iter.next().unwrap(); // Can't be empty.
                         let opening_prefix = {
                             let mut tmp: Option<Option<String>> = None;
@@ -406,14 +407,15 @@ impl Element {
                     }
                 }
                 Event::Text(s) => {
-                    let text = s.unescape_and_decode(reader)?;
+                    let text = s.unescape()?;
                     if !text.is_empty() {
                         let current_elem = stack.last_mut().unwrap();
                         current_elem.append_text_node(text);
                     }
                 }
                 Event::CData(s) => {
-                    let text = s.unescape_and_decode(&reader)?;
+                    let s = s.into_inner();
+                    let text = str::from_utf8(&s)?;
                     if !text.is_empty() {
                         let current_elem = stack.last_mut().unwrap();
                         current_elem.append_text_node(text);
@@ -446,7 +448,7 @@ impl Element {
 
     /// Output the document to quick-xml `Writer`
     pub fn to_writer_decl<W: Write>(&self, writer: &mut EventWriter<W>) -> Result<()> {
-        writer.write_event(Event::Decl(BytesDecl::new(b"1.0", Some(b"utf-8"), None)))?;
+        writer.write_event(Event::Decl(BytesDecl::new("1.0", Some("utf-8"), None)))?;
         self.write_to_inner(writer, &mut BTreeMap::new())
     }
 
@@ -492,10 +494,10 @@ impl Element {
         };
 
         let name = match self_prefix {
-            (Some(ref prefix), _) => Cow::Owned(format!("{}:{}", prefix, self.name)),
-            _ => Cow::Borrowed(&self.name),
+            (Some(ref prefix), _) => format!("{}:{}", prefix, self.name).into(),
+            _ => Cow::Borrowed(&*self.name),
         };
-        let mut start = BytesStart::borrowed(name.as_bytes(), name.len());
+        let mut start = BytesStart::new(&*name);
 
         // Write self prefix if necessary
         match self_prefix {
@@ -543,7 +545,7 @@ impl Element {
             child.write_to_inner(writer, &mut all_prefixes.clone())?;
         }
 
-        writer.write_event(Event::End(BytesEnd::borrowed(name.as_bytes())))?;
+        writer.write_event(Event::End(BytesEnd::new(name)))?;
         Ok(())
     }
 
@@ -838,26 +840,26 @@ fn build_element<R: BufRead>(
     event: &BytesStart,
     prefixes: &mut BTreeMap<Prefix, Namespace>,
 ) -> Result<Element> {
-    let (prefix, name) = split_element_name(str::from_utf8(event.name())?)?;
+    let (prefix, name) = split_element_name(str::from_utf8(event.name().0)?)?;
     let mut local_prefixes = BTreeMap::new();
 
     let attributes = event
         .attributes()
         .map(|o| {
             let o = o?;
-            let key = str::from_utf8(o.key)?.to_owned();
-            let value = o.unescape_and_decode_value(reader)?;
+            let key = str::from_utf8(o.key.0)?.to_owned();
+            let value = o.decode_and_unescape_value(reader)?.to_string();
             Ok((key, value))
         })
         .filter(|o| match *o {
             Ok((ref key, ref value)) if key == "xmlns" => {
                 local_prefixes.insert(None, value.clone());
-                prefixes.insert(None, value.clone());
+                prefixes.insert(None, value.to_string());
                 false
             }
             Ok((ref key, ref value)) if key.starts_with("xmlns:") => {
                 local_prefixes.insert(Some(key[6..].to_owned()), value.to_owned());
-                prefixes.insert(Some(key[6..].to_owned()), value.to_owned());
+                prefixes.insert(Some(key[6..].to_owned()), value.to_string());
                 false
             }
             _ => true,

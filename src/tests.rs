@@ -15,7 +15,7 @@ use crate::error::Error;
 
 use quick_xml::Reader;
 
-const TEST_STRING: &'static str = r#"<root xmlns="root_ns" a="b" xml:lang="en">meow<child c="d"/><child xmlns="child_ns" d="e" xml:lang="fr"/>nya</root>"#;
+const TEST_STRING: &str = r#"<root xmlns="root_ns" a="b" xml:lang="en">meow<child c="d"/><child xmlns="child_ns" d="e" xml:lang="fr"/>nya</root>"#;
 
 fn build_test_tree() -> Element {
     let mut root = Element::builder("root", "root_ns")

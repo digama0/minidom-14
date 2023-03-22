@@ -3,8 +3,7 @@
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-extern crate minidom_14 as minidom;
+#![allow(unused)]
 
 use minidom::Element;
 
@@ -41,7 +40,7 @@ fn main() {
             let title = child.get_child("title", ARTICLE_NS).unwrap().text();
             let body = child.get_child("body", ARTICLE_NS).unwrap().text();
             articles.push(Article {
-                title: title,
+                title,
                 body: body.trim().to_owned(),
             });
         }

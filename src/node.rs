@@ -18,7 +18,7 @@ use quick_xml::events::{BytesText, Event};
 use quick_xml::Writer as EventWriter;
 
 /// A node in an element tree.
-#[derive(Clone, Debug, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Node {
     /// An `Element`.
     Element(Element),
@@ -168,7 +168,7 @@ impl Node {
         match *self {
             Node::Element(ref elmt) => elmt.write_to_inner(writer, prefixes)?,
             Node::Text(ref s) => {
-                writer.write_event(Event::Text(BytesText::from_plain_str(s)))?;
+                writer.write_event(Event::Text(BytesText::new(s)))?;
             }
         }
 
@@ -200,15 +200,5 @@ impl<'a> From<&'a str> for Node {
 impl From<ElementBuilder> for Node {
     fn from(builder: ElementBuilder) -> Node {
         Node::Element(builder.build())
-    }
-}
-
-impl PartialEq for Node {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (&Node::Element(ref elem1), &Node::Element(ref elem2)) => elem1 == elem2,
-            (&Node::Text(ref text1), &Node::Text(ref text2)) => text1 == text2,
-            _ => false,
-        }
     }
 }

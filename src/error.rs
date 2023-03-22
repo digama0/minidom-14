@@ -96,6 +96,12 @@ impl From<::quick_xml::Error> for Error {
     }
 }
 
+impl From<::quick_xml::events::attributes::AttrError> for Error {
+    fn from(err: ::quick_xml::events::attributes::AttrError) -> Error {
+        Error::XmlError(err.into())
+    }
+}
+
 impl From<::std::str::Utf8Error> for Error {
     fn from(err: ::std::str::Utf8Error) -> Error {
         Error::Utf8Error(err)

@@ -1,4 +1,15 @@
-Version 0.14.0, released 2022-03-07:
+Version 0.15.0, released 2023-03-22:
+  * Changes
+    * Bump quick-xml dependency (breaking change only because it is re-exported)
+  * Fixes
+    * Fix warnings
+
+**minidom-14** version 0.14.0, released 2023-03-22:
+  * No changes (identical to minidom 0.14.0)
+
+---
+
+**minidom** version 0.14.0, released 2022-03-07:
   * Changes
     * Bump quick-xml dependency (thanks eijebong!)
   * Fixes
