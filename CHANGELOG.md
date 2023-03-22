@@ -1,3 +1,8 @@
+Version 0.16.0, released 2023-03-22:
+  * Changes
+    * Update quick-xml to 0.28
+    * use edition 2021
+
 Version 0.15.0, released 2023-03-22:
   * Changes
     * Bump quick-xml dependency (breaking change only because it is re-exported)

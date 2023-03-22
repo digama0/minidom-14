@@ -1,6 +1,6 @@
 [package]
 name = "minidom-14"
-version = "0.15.0"
+version = "0.16.0"
 authors = [
   "lumi <lumi@pew.im>",
   "Emmanuel Gil Peyrot <linkmauve@linkmauve.fr>",
@@ -15,10 +15,10 @@ documentation = "https://docs.rs/minidom-14"
 readme = "README.md"
 keywords = ["xml", "xmpp"]
 license = "MPL-2.0"
-edition = "2018"
+edition = "2021"
 
 [lib]
 name = "minidom"
 
 [dependencies]
-quick-xml = "0.27"
+quick-xml = "0.28"
