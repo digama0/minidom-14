@@ -112,6 +112,10 @@ impl PartialEq for Element {
     fn eq(&self, other: &Self) -> bool {
         if self.name() == other.name() && self.ns() == other.ns() && self.attrs().eq(other.attrs())
         {
+            if self.nodes().count() != other.nodes().count() {
+                return false;
+            }
+
             self.nodes()
                 .zip(other.nodes())
                 .all(|(node1, node2)| node1 == node2)
@@ -1135,6 +1139,16 @@ mod tests {
         let mut reader = EventReader::from_str(xml);
         let elem = Element::from_reader(&mut reader).unwrap();
         assert_eq!(elem.text(), "&apos;&gt;blah<blah>");
+    }
+
+    #[test]
+    fn test_compare_empty_children() {
+        let elem1 = Element::bare("p", "");
+        let elem2 = Element::builder("p", "")
+            .append(Node::Element(Element::bare("span", "")))
+            .build();
+
+        assert_ne!(elem1, elem2);
     }
 
     #[test]
