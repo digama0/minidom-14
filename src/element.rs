@@ -329,10 +329,8 @@ impl Element {
                 Event::Eof => {
                     return Err(Error::EndOfDocument);
                 }
-                Event::Comment { .. } => {
-                    return Err(Error::NoComments);
-                }
-                Event::Text { .. }
+                Event::Comment { .. }
+                | Event::Text { .. }
                 | Event::End { .. }
                 | Event::CData { .. }
                 | Event::Decl { .. }
@@ -428,8 +426,10 @@ impl Element {
                 Event::Eof => {
                     break;
                 }
-                Event::Comment(_) => return Err(Error::NoComments),
-                Event::Decl { .. } | Event::PI { .. } | Event::DocType { .. } => (),
+                Event::Comment(_)
+                | Event::Decl { .. }
+                | Event::PI { .. }
+                | Event::DocType { .. } => (),
             }
         }
         Ok(stack.pop().unwrap())
@@ -1061,7 +1061,7 @@ mod tests {
             "namespace".to_owned(),
             None,
             (None, "namespace".to_owned()),
-            BTreeMap::from_iter(vec![("name".to_string(), "value".to_string())].into_iter()),
+            BTreeMap::from_iter([("name".to_string(), "value".to_string())]),
             Vec::new(),
         );
 

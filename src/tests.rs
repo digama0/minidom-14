@@ -421,15 +421,6 @@ fn namespace_inherited_prefixed2() {
 }
 
 #[test]
-fn fail_comments() {
-    let elem: Result<Element, Error> = "<foo xmlns='ns1'><!-- bar --></foo>".parse();
-    match elem {
-        Err(Error::NoComments) => (),
-        _ => panic!(),
-    };
-}
-
-#[test]
 fn xml_error() {
     match "<a xmlns='ns1'></b>".parse::<Element>() {
         Err(crate::error::Error::XmlError(_)) => (),
