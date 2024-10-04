@@ -852,7 +852,7 @@ fn build_element<R: BufRead>(
         .map(|o| {
             let o = o?;
             let key = str::from_utf8(o.key.0)?.to_owned();
-            let value = o.decode_and_unescape_value(reader)?.to_string();
+            let value = o.decode_and_unescape_value(reader.decoder())?.to_string();
             Ok((key, value))
         })
         .filter(|o| match *o {

@@ -21,4 +21,4 @@ edition = "2021"
 name = "minidom"
 
 [dependencies]
-quick-xml = "0.28"
+quick-xml = "0.36"
