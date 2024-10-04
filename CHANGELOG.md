@@ -1,3 +1,10 @@
+Version 0.17.0, released 2024-10-04:
+  * Changes
+    * Update quick-xml to 0.36
+    * Allow comments
+  * Fixes
+    * Fix PartialEq implementation for Element
+
 Version 0.16.0, released 2023-03-22:
   * Changes
     * Update quick-xml to 0.28
